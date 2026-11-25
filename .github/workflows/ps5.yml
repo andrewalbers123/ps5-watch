@@ -1,0 +1,28 @@
+# Save in your repo as: .github/workflows/ps5.yml
+# Repo secrets:   BESTBUY_API_KEY, NTFY_TOPIC
+# Repo variables: SKUS (comma-separated Best Buy SKUs)
+name: PS5 watch
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: state.json
+          key: ps5-state-${{ github.run_id }}
+          restore-keys: ps5-state-
+      - name: Check stock
+        run: python3 ps5_watch.py
+        env:
+          BESTBUY_API_KEY: ${{ secrets.BESTBUY_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          SKUS: ${{ vars.SKUS }}
+          ZIP: "78702"
+          RADIUS_MILES: "25"
